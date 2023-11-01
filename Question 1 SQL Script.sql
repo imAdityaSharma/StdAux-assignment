@@ -28,11 +28,13 @@
 --    display “Credit” for “C” and “Debit for “D” And WeekDay is TransDate of WeekDay, e.g. Today’s Date is “Apr 17 2006” and 
 --    Today WeekDay is “Monday”
 
-select CustomerID, TransDate,  
+select CustomerID,
 		case when TransType= 'C' then 'Credit'
 			 when TransType= 'D' then 'Debit'
 		end as TransType,
-		Amount, to_char(TransDate,'Day') as WeekDay 
+		Amount,
+		to_char(TransDate,'MM/DD/YYYY') as Transdate,
+		to_char(TransDate,'Day') as WeekDay 
 		from sqltest1 ;
 		
 --Query 2: Display Trans Table records with following columns CustomerID, TransDate, Credit Amount, Debit Amount, Where Credit Amount 
