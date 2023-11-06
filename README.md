@@ -11,7 +11,7 @@ CPP file of question 2 is working properly with examples for "call by value" and
 cpp file is not solved for error but the explanation for the question asked is written in comments.
 
 <h2>Question 4:</h2>
-The web server in c is implemented using Windows socket library (winsock2).
+The web server in c is implemented using GCC compiler On linux environment (ubuntu 22.04) will not work on windows.
 
 <h2>Question 5:</h2>
 Please refer to <a href="https://github.com/imAdityaSharma/StdAux-assignment/blob/master/Q5%20Cef%20calci/read.md" > read.md </a> for detailed instruction to navigate through Chromium embedded framework solution for Question 5.
