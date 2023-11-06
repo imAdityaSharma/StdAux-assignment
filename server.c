@@ -1,19 +1,21 @@
 /*
 
-Start
--->	Create a TCP socket
--->	Bind the socket to the port 8080
--->	Listen for incoming connections
--->	Accept an incoming connection
--->	Read the HTTP request from the client
--->	Parse the HTTP request to determine the method and path
--->	If the method is not GET
-	----->	Send a 405 Method Not Allowed response and close the connection
--->	Else
-	----->	Get the parameters passed with the GET request
--->	Generate the HTTP response
--->	Send the HTTP response to the client
--->	Close the connection
+Start -
+
+step 1 -->	Create a TCP socket
+step 2 -->	Bind the socket to the port 8080
+step 3 -->	Listen for incoming connections
+step 4 -->	Accept an incoming connection
+step 5 -->	Read the HTTP request from the client
+step 6 -->	Parse the HTTP request to determine the method and path
+step 7 -->	If the method is not GET
+	    ----->	Send a 405 Method Not Allowed response and close the connection
+        -->	Else
+	    ----->	Get the parameters passed with the GET request
+step 8 -->	Generate the HTTP response
+step 9 -->	Send the HTTP response to the client
+step 10 -->	Close the connection
+
 End
 
 */
@@ -28,76 +30,61 @@ End
 #define PORT 8080
 
 int main() {
-  // Create a TCP socket
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0); //creating TCP socket
   if (socket_fd < 0) {
     perror("socket");
-    exit(EXIT_FAILURE);
-  }
+    exit(EXIT_FAILURE);  }
 
-  // Bind the socket to the port
-  struct sockaddr_in server_addr;
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = INADDR_ANY;
-  server_addr.sin_port = htons(PORT);
+/* xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx */
+  // Binding socket to the port
+  struct sockaddr_in ServerAddress;
+  ServerAddress.sin_family = AF_INET;
+  ServerAddress.sin_addr.s_addr = INADDR_ANY;
+  ServerAddress.sin_port = htons(PORT);
+/* xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx */
 
-  int bind_result = bind(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  int bind_result = bind(socket_fd, (struct sockaddr *)&ServerAddress, sizeof(ServerAddress));
   if (bind_result < 0) {
     perror("bind");
     exit(EXIT_FAILURE);
   }
 
-  // Listen for incoming connections
-  int listen_result = listen(socket_fd, 10);
+int listen_result = listen(socket_fd, 10);   // Listening for incoming connections
   if (listen_result < 0) {
     perror("listen");
     exit(EXIT_FAILURE);
   }
 
-  // Accept an incoming connection
-  int client_socket_fd = accept(socket_fd, NULL, NULL);
-  if (client_socket_fd < 0) {
+  int ClientSocket = accept(socket_fd, NULL, NULL); // Accepting an incoming connection
+  if (ClientSocket < 0) {
     perror("accept");
-    exit(EXIT_FAILURE);
-  }
+    exit(EXIT_FAILURE);  }
 
-  // Read the HTTP request
   char request_buffer[1024];
-  int bytes_received = recv(client_socket_fd, request_buffer, sizeof(request_buffer), 0);
+  int bytes_received = recv(ClientSocket, request_buffer, sizeof(request_buffer), 0); // get HTTP request
   if (bytes_received < 0) {
     perror("recv");
     exit(EXIT_FAILURE);
   }
 
-  // Parse the HTTP request
+  // Parseing the HTTP request
   char *method = strtok(request_buffer, " ");
   char *path = strtok(NULL, " ");
+  
+  if (strcmp(method, "GET") != 0)// Checking if request is a GET request
+   {  send(ClientSocket, "HTTP/1.1 405 Method Not Allowed\r\n\r\n", 32, 0);
+      close(ClientSocket);
+      exit(EXIT_SUCCESS);  }
 
-  // Check if the request is a GET request
-  if (strcmp(method, "GET") != 0) {
-    // Not a GET request
-    send(client_socket_fd, "HTTP/1.1 405 Method Not Allowed\r\n\r\n", 32, 0);
-    close(client_socket_fd);
-    exit(EXIT_SUCCESS);
-  }
-
-  // Get the parameters passed with the GET request
-  char *parameters = strtok(NULL, "\r\n");
-
-  // Generate the HTTP response
+  char *parameters = strtok(NULL, "\r\n"); // Getting parameters passed with the GET request
   char response_buffer[1024];
-  sprintf(response_buffer, "HTTP/1.1 200 OK\r\nContent-Encoding: utf-8\r\nContent-Type: text/html\r\n\r\n<h1>Hello, world!</h1>\n<p>Parameters: %s</p>\n", parameters);
-
-  // Send the HTTP response
-  int bytes_sent = send(client_socket_fd, response_buffer, sizeof(response_buffer), 0);
+  sprintf(response_buffer, "HTTP/1.1 200 OK\r\nContent-Encoding: utf-8\r\nContent-Type: text/html\r\n\r\n<h1>Hello, world!</h1>\n<p>Parameters: %s</p>\n", parameters);// creating HTTP response
+  int bytes_sent = send(ClientSocket, response_buffer, sizeof(response_buffer), 0);  // Sending HTTP response
   if (bytes_sent < 0) {
     perror("send");
-    exit(EXIT_FAILURE);
-  }
+    exit(EXIT_FAILURE);  }
 
-  // Close the sockets
-  close(client_socket_fd);
+  close(ClientSocket);
   close(socket_fd);
-
   return EXIT_SUCCESS;
 }
